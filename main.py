@@ -1,32 +1,33 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import re
 
 
 def main():
 
-    data = []
-    f=open("/home/daemord/dev/AoC2020/input.txt", "r")
-    fl =f.readlines()
+    f = open("/home/daemord/dev/AoC2020/input02.txt", "r")
+    fl = f.readlines()
+    passfound = 0
+    passfound2 = 0
     for x in fl:
-        #print(int(x))
-        data.append(int(x))
-    print(data)
+        rex = re.compile('([0-9]+)-([0-9]+) (.): (.+)')
+        num1, num2, searchChar, passData = rex.search(x).groups()
+        num1 = int(num1)
+        num2 = int(num2)
+        if passData.count(searchChar) <= num2:
+            if passData.count(searchChar) >= num1:
+                passfound = passfound + 1
 
-    #while dpd != 2020:
-    for x in data:
-        for y in data:
-            for z in data:
-                dpd=(x+y+z)
-                #print(dpd)
-                if dpd == 2020:
-                    print(x)
-                    print(y)
-                    print(z)
-                    print(x*y*z)
-    #print(x)
-    #print(y)
+        if passData[num1-1] == searchChar or passData[num2-1] == searchChar:
+            data1 = passData[num1-1]
+            data2 = passData[num2-1]
+            data3 = data1 + data2
+            print(data3)
+            countString = data3.count(searchChar)
+            print(searchChar)
+            print(countString)
+            if countString == 1:
+                passfound2 = passfound2 + 1
+    print(passfound)
+    print(passfound2)
 
 if __name__== "__main__":
   main()
