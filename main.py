@@ -1,5 +1,7 @@
 import re
 import math
+import time
+start_time = time.time()
 
 rex = re.compile('(^(.*?)bag)|(contain [0-9] ((.*?)bag))|(, [0-9] ((.*?)bag))')
 rex2 = re.compile('(\w* \w*) (bag)')
@@ -103,4 +105,6 @@ print("Answer 1")
 print(answer1)
 print("Answer 2")
 print(answer2)
+
+print('Took', time.time() - start_time, 's to complete')
 
