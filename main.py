@@ -3,108 +3,71 @@ import math
 import time
 start_time = time.time()
 
-rex = re.compile('(^(.*?)bag)|(contain [0-9] ((.*?)bag))|(, [0-9] ((.*?)bag))')
-rex2 = re.compile('(\w* \w*) (bag)')
-rex3 = re.compile('\d')
+rex = re.compile('(...)\s(.)(\d*)')
 
 def data():
 
-    #with open('test07.txt') as f:
-    with open('input07.txt') as f:
-    #with open('test0702.txt') as f:
+    #with open('test08.txt') as f:
+    with open('input08.txt') as f:
         lines = f.read().strip()
 
-    #dataprocess = lines.split('\n\n')
     dataprocess = lines.split('\n')
     stripped = [w.replace('\n', '') for w in dataprocess]
-    return stripped
+    dataoutput = []
+    for x in stripped:
+        data = list(rex.search(x).groups())
+        dataoutput.append(data)
+    return dataoutput
 
-
-def bagcount(srch,datainput):
-    count = 0
-    countnew = 0
-    for x in datainput:
-        data = rex2.findall(x)
-        for i in data:
-            if i[0] == srch:
-                if data[0][0] == srch:
-                    if data[0][0] not in bagcan:
-                        bagcan.append(data[0][0])
-                else:
-                    if data[0][0] not in srchfor:
-                        srchfor.append(data[0][0])
-                        bagcount(data[0][0],datainput)
-
-    count = len([i for i in bagcan if i != srch])
-    return count
-
-def bagcount2(srch,countinput, datainput):
-    count = 0
-    countnew = 0
-    if countinput == 0:
-        countinput = 1
-    runningttl = 0
-    for x in datainput:
-        data = rex2.findall(x)
-        if data[0][0] == srch:
-            for i in bagcountnew(srch)[1:]:
-                newfigure = i[1]
-                cnt = bagcount2(i[0],newfigure, datainput)
-                if cnt == 0:
-                    runningttl += newfigure
-                else:
-                    runningttl += cnt
-
-    count = runningttl * countinput + countinput
-    return count
-
-def bagdata(datainput):
+def arraysrc(data,src):
     output = []
-    for x in datainput:
-        tmp = []
-        data = rex2.findall(x)
-        tmp.append(data[0][0])
-        data2 = rex3.findall(x)
-        for i in data[1:]:
-            val = 0
-            for i in data2:
-                val += int(i)
-        tmp.append(val)
-        for y, i in enumerate(data[1:]):
-            tmp.append(i[0])
-            if (i[0]) != "no other":
-                tmp.append(data2[y])
-            val = 0
-            for i in data2:
-                val += int(i)
-        output.append(tmp)
+    for y, i in enumerate(data):
+        if i[0] == src:
+            output.append(y)
     return output
 
-def bagcountnew(srch):
-    output = []
-    for x in bagdata(data()):
-        if x[0] == srch:
-            output.append(x[1])
-            for y, i in enumerate(x[2:]):
-                if (y % 2) == 0:
-                    tmp = []
-                    tmp.append(i)
-                else:
-                    tmp.append(int(i))
-                    output.append(tmp)
-    return output
+def analyse(data):
+    i = 0
+    acc = 0
+    entrydone = [0]
+    while i < len(data):
+        if data[i][0] == "nop":
+            i += 1
+        elif data[i][0] == "jmp":
+            if data[i][1] == "+":
+                i = i + (int(data[i][2]))
+            elif data[i][1] == "-":
+                i = i - (int(data[i][2]))
+        elif data[i][0] == "acc":
+            if data[i][1] == "+":
+                acc += int(data[i][2])
+                i += 1
+            elif data[i][1] == "-":
+                acc -= int(data[i][2])
+                i += 1
+        if i not in entrydone:
+            entrydone.append(i)
+        else:
+            break
+    return(acc,i,len(data))
 
-srchfor = []
-bagcan = []
-answer1 = bagcount("shiny gold",data())
-answer2 = bagcount2("shiny gold",1,data()) - 1
-#answer2 = bagdata(data())
-#print(bagcountnew("shiny gold"))
+def swptest(var1,var2):
+    datainput = data()
+    datahold = []
+    for i in arraysrc(datainput,var1):
+        datahold = datainput
+        datahold[i][0] = var2
+        x = analyse(datahold)
+        datahold[i][0] = var1
+        if (x[1]) == (x[2]):
+            return(i,x[0])
 
+answer1 = analyse(data())
+jmp = (swptest("jmp","nop"))
+#nop = (swptest("nop","jmp"))
 print("Answer 1")
-print(answer1)
+print(answer1[0])
 print("Answer 2")
-print(answer2)
+print(jmp[1])
 
 print('Took', time.time() - start_time, 's to complete')
-
