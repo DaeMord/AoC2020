@@ -7,16 +7,14 @@ rex = re.compile('(...)\s(.)(\d*)')
 
 def data():
 
+    dataoutput = []
     #with open('test08.txt') as f:
     with open('input08.txt') as f:
-        lines = f.read().strip()
+        for line in f:
+            linedata = line.strip()
+            data = list(rex.search(linedata).groups())
+            dataoutput.append(data)
 
-    dataprocess = lines.split('\n')
-    stripped = [w.replace('\n', '') for w in dataprocess]
-    dataoutput = []
-    for x in stripped:
-        data = list(rex.search(x).groups())
-        dataoutput.append(data)
     return dataoutput
 
 def arraysrc(data,src):
@@ -64,10 +62,10 @@ def swptest(var1,var2):
 
 answer1 = analyse(data())
 jmp = (swptest("jmp","nop"))
-#nop = (swptest("nop","jmp"))
+nop = (swptest("nop","jmp"))
 print("Answer 1")
 print(answer1[0])
 print("Answer 2")
 print(jmp[1])
 
-print('Took', time.time() - start_time, 's to complete')
+print('Took', round(time.time() - start_time,2), 'seconds to complete')
