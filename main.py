@@ -10,6 +10,20 @@ start_time = time.time()
 #2 Actual live data
 dataInput = 2
 
+def datat():
+
+    dataoutput = []
+    fileName = ''
+    fileName = 'test10f.txt'
+    with open(fileName) as f:
+        for line in f:
+            linedata = line.strip()
+            data = linedata
+            dataoutput.append(int(data))
+    #dataoutput.append(0)
+
+    return dataoutput
+
 def data():
 
     dataoutput = []
@@ -17,6 +31,7 @@ def data():
     if dataInput == 0: fileName = 'test10s.txt'
     if dataInput == 1: fileName = 'test10l.txt'
     if dataInput == 2: fileName = 'input10.txt'
+    if dataInput == 3: fileName = 'test10f.txt'
     with open(fileName) as f:
         for line in f:
             linedata = line.strip()
@@ -38,7 +53,6 @@ def difInArray(input,data):
     return -1,-1
 
 def compareArray(A, B):
-    #return ', '.join(map(str, A)) in ', '.join(map(str, B))
     n = len(A)
     return any(A == B[i:i + n] for i in range(len(B)-n + 1))
 
@@ -61,18 +75,26 @@ def analyse(data):
 
 
 def analyse2(data):
-    loopcount = 0
-    i = 1
     dataCheck = sorted(data)
-    whereChange = []
-    while i < len(data):
-        x = canIRemove((i, i), dataCheck)
-        if x:
-            whereChange.append(i)
-        i += 1
-    print(whereChange)
-    print(len(whereChange)+1)
+    complete_list = list(set(dataCheck)) + [dataCheck[-1] + 3]
+    times = 1
+    left, right = 0, 0
+    while left < len(complete_list) - 1 and right < len(complete_list) - 1:
+        while complete_list[right + 1] - complete_list[right] == 1:
+            right += 1
+        times *= count_combination(complete_list[left:right+1])
+        right += 1
+        left = right
+    return times
 
+def count_combination(adapters):
+    if len(adapters) == 3:
+        return 2
+    elif len(adapters) > 3:
+        # full list + (full list minus 1 of the middle numbers) + (full list minus combination of any 2 middle numbers)
+        result = 1 + len(adapters) - 2 + int(math.factorial(len(adapters) - 2) / 2)
+        return result
+    return 1
 
 def canIRemove(dataPosition,data):
     datal = data[dataPosition[0]-1]
@@ -84,13 +106,34 @@ def canIRemove(dataPosition,data):
         return True
     return False
 
+
+def countSomething():
+    data = datat()
+    flat = list(itertools.combinations(data,1))
+    numbers = list(itertools.combinations(data, 2))
+    numbers1 = list(itertools.combinations(data, 3))
+    numbers2 = list(itertools.combinations(data, 4))
+    numbers3 = list(itertools.combinations(data, 5))
+    print(flat)
+    print(numbers)
+    print(numbers1)
+    print(numbers2)
+    print(numbers3)
+    print(len(flat))
+    print(len(numbers))
+    print(len(numbers1))
+    print(len(numbers2))
+    print(len(numbers3))
+
+
 dataInput = data()
+#countSomething()
 dataOutput = analyse(dataInput)
 answer1 = dataOutput[1] * dataOutput[3]
-analyse2(dataInput)
+answer2 = analyse2(dataInput)
 print("Answer 1")
 print(answer1)
 print("Answer 2")
-#print(answer2)
+print(answer2)
 
 print('Took', round(time.time() - start_time,2), 'seconds to complete')
