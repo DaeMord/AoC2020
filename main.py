@@ -2,67 +2,95 @@ import re
 import math
 import time
 import itertools
+
 start_time = time.time()
 
-rex = re.compile('(...)\s(.)(\d*)')
+#0 Test Short
+#1 Test Long
+#2 Actual live data
+dataInput = 2
 
 def data():
 
     dataoutput = []
-    #with open('test09.txt') as f:
-    with open('input09.txt') as f:
+    fileName = ''
+    if dataInput == 0: fileName = 'test10s.txt'
+    if dataInput == 1: fileName = 'test10l.txt'
+    if dataInput == 2: fileName = 'input10.txt'
+    with open(fileName) as f:
         for line in f:
             linedata = line.strip()
             data = linedata
             dataoutput.append(int(data))
+    dataoutput.append(0)
 
     return dataoutput
 
-def somedata(data,varWide):
-    for loopValue, a in enumerate(data):
-        val = data[loopValue+varWide]
-        if val not in [sum(numbers) for numbers in itertools.combinations(data[loopValue:loopValue+varWide],2)]: return(val)
 
-def analyse(data,range):
-    invalid = []
-    for loopValue, a in enumerate(data):
-        checkValue = loopValue + range
-        dataTest = data[loopValue:checkValue]
-        dataToCheck = data[checkValue]
-        arrayToBeChecked = []
-        for i in dataTest:
-            for j in dataTest:
-                tmp = i + j
-                arrayToBeChecked.append(tmp)
-        if dataToCheck not in arrayToBeChecked:
-            invalid.append(dataToCheck)
-        if loopValue >= (len(data) - range - 1): break
-    return invalid[0]
+def difInArray(input,data):
+    #Returns (difference in array), (output value)
+    # -1,-1 if not found
+    i = 0
+    while i < 3:
+        i += 1
+        if input + i in data:
+            return(i, input + i)
+    return -1,-1
 
-def analyse2(data,valueToFind):
+def compareArray(A, B):
+    #return ', '.join(map(str, A)) in ', '.join(map(str, B))
+    n = len(A)
+    return any(A == B[i:i + n] for i in range(len(B)-n + 1))
+
+def analyse(data):
+    currentVal = 0
+    countArray = []
+    while currentVal < max(data):
+        activeData = difInArray(currentVal, data)
+        if activeData[0] == -1: return -1, -1, -1, -1
+        currentVal = activeData[1]
+        countArray.append(activeData[0])
+    #add final value for output
+    currentVal = currentVal + 3
+    countArray.append(3)
+    #do a count on 1/2/3
+    c1 = countArray.count(1)
+    c2 = countArray.count(2)
+    c3 = countArray.count(3)
+    return currentVal, c1, c2, c3
+
+
+def analyse2(data):
+    loopcount = 0
     i = 1
-    output = 0
-    for loopValue, a in enumerate(data):
-        while i < len(data):
-            dataSum = sum(data[loopValue:i])
-            if dataSum == valueToFind:
-                answerArray = data[loopValue:i]
-                if len(answerArray) > 1:
-                    output = min(answerArray) + max(answerArray)
-            if dataSum > valueToFind: break
-            i += 1
-        i = loopValue + 2
-    return output
+    dataCheck = sorted(data)
+    whereChange = []
+    while i < len(data):
+        x = canIRemove((i, i), dataCheck)
+        if x:
+            whereChange.append(i)
+        i += 1
+    print(whereChange)
+    print(len(whereChange)+1)
 
 
-wide = 25
+def canIRemove(dataPosition,data):
+    datal = data[dataPosition[0]-1]
+    if dataPosition[1]+1 == len(data):
+        datah = data[dataPosition[1]]+3
+    else:
+        datah = data[dataPosition[1]+1]
+    if datah-datal < 4:
+        return True
+    return False
+
 dataInput = data()
-answer1 = analyse(dataInput,wide)
-answer2 = analyse2(dataInput,answer1)
-print(somedata(dataInput,wide))
+dataOutput = analyse(dataInput)
+answer1 = dataOutput[1] * dataOutput[3]
+analyse2(dataInput)
 print("Answer 1")
 print(answer1)
 print("Answer 2")
-print(answer2)
+#print(answer2)
 
 print('Took', round(time.time() - start_time,2), 'seconds to complete')
