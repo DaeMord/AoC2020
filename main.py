@@ -2,118 +2,194 @@ import re
 import math
 import time
 import itertools
-import AoC
+from AoC import dataRex
+from AoC import printArray
+import numpy as np
+from collections import defaultdict
 
 start_time = time.time()
 
 #0 Test Short
-#1 Test Long
-#2 Actual live data
-dataInput = 2
+#1 Actual live data
+dataSet = 1
 
-def data():
+if dataSet == 0:
+    dataInput = dataRex('test11.txt','L|.|#')
+if dataSet == 1:
+    dataInput = dataRex('input11.txt', 'L|.|#')
+if dataSet == 2:
+    dataInput = dataRex('input112.txt', 'L|.|#')
+if dataSet == 3:
+    dataInput = dataRex('input113.txt', 'L|.|#')
 
-    dataoutput = []
-    fileName = ''
-    if dataInput == 0: fileName = 'test10s.txt'
-    if dataInput == 1: fileName = 'test10l.txt'
-    if dataInput == 2: fileName = 'input10.txt'
-    if dataInput == 3: fileName = 'test10f.txt'
-    with open(fileName) as f:
-        for line in f:
-            linedata = line.strip()
-            data = linedata
-            dataoutput.append(int(data))
-    dataoutput.append(0)
+def emptySeats(inputArray):
+    #convert to nparray
+    inputArray=np.array(inputArray)
+    #reset all seats to empty
+    inputArray = np.where(inputArray == 'L', '#', inputArray)
+    return inputArray
 
-    return dataoutput
+def addPadding(inputArray):
+    y = int(len(inputArray))
+    x = int(len(inputArray[0]))
+    tmp = ['.'] * (x + 2)
+    outPutArray = np.array(tmp)
+    for x in inputArray:
+        x = np.insert(x, 0, '.')
+        x = np.append(x, '.')
+        outPutArray = np.vstack([outPutArray, x])
+    outPutArray = np.vstack([outPutArray, tmp])
+    return outPutArray
 
-
-def difInArray(input,data):
-    #Returns (difference in array), (output value)
-    # -1,-1 if not found
-    i = 0
-    while i < 3:
-        i += 1
-        if input + i in data:
-            return(i, input + i)
-    return -1,-1
-
-def compareArray(A, B):
-    n = len(A)
-    return any(A == B[i:i + n] for i in range(len(B)-n + 1))
-
-def analyse(data):
-    currentVal = 0
-    countArray = []
-    while currentVal < max(data):
-        activeData = difInArray(currentVal, data)
-        if activeData[0] == -1: return -1, -1, -1, -1
-        currentVal = activeData[1]
-        countArray.append(activeData[0])
-    #add final value for output
-    currentVal = currentVal + 3
-    countArray.append(3)
-    #do a count on 1/2/3
-    c1 = countArray.count(1)
-    c2 = countArray.count(2)
-    c3 = countArray.count(3)
-    return currentVal, c1, c2, c3
+def checkSeat(x,y,dataInput):
+    xCheck = -1
+    yCheck = -1
+    filledSeat = 0
+    while yCheck < 2:
+        while xCheck < 2:
+            if dataInput[y+yCheck,x+xCheck] == '#':
+                filledSeat += 1
+            xCheck += 1
+        xCheck = -1
+        yCheck += 1
+    if dataInput[y,x] == '#':
+        filledSeat -= 1
+    return filledSeat
 
 
-def analyse2(data):
-    dataCheck = sorted(data)
-    complete_list = list(set(dataCheck)) + [dataCheck[-1] + 3]
-    times = 1
-    left, right = 0, 0
-    while left < len(complete_list) - 1 and right < len(complete_list) - 1:
-        while complete_list[right + 1] - complete_list[right] == 1:
-            right += 1
-        times *= count_combination(complete_list[left:right+1])
-        right += 1
-        left = right
-    return times
+def closestSeat(dataInput,splitPoint):
+    output = 0
+    dataPoint = int(np.where(dataInput == splitPoint)[0])
+    dataLeft = np.flip(dataInput[0:dataPoint])
+    dataRight = dataInput[dataPoint+1:]
+    data2Left = np.where(dataLeft != '.')[0]
+    data2Right = np.where(dataRight != '.')[0]
+    if data2Left.size != 0 and dataLeft[data2Left][0] == "#":
+        output += 1
+    if data2Right.size != 0 and dataRight[data2Right][0] == '#':
+        output += 1
+    return output
 
-def count_combination(adapters):
-    if len(adapters) == 3:
-        return 2
-    elif len(adapters) > 3:
-        # full list + (full list minus 1 of the middle numbers) + (full list minus combination of any 2 middle numbers)
-        result = 1 + len(adapters) - 2 + int(math.factorial(len(adapters) - 2) / 2)
-        return result
-    return 1
+def checkSeat2(x,y,dataInput):
+    replacementVar = 'C'
+    offset = x - y
+    calcArray = []
+    holddata = ''
+    holddata = dataInput[y, x]
+    dataInput[y, x] = replacementVar
+    # diagonal l>r
+    dlr = np.diagonal(dataInput, offset)
+    calcArray.append(closestSeat(dlr,replacementVar))
+    offset2 = (len(dataInput[0]) - x - 1) - y
+    # diagonal r>l
+    drl = np.diagonal(np.flip(dataInput, 1), offset2)
+    calcArray.append(closestSeat(drl, replacementVar))
+    # l>r
+    lr = dataInput[y]
+    calcArray.append(closestSeat(lr, replacementVar))
+    # t>b
+    offset3 = (len(dataInput[0]))
+    tb = np.rot90(dataInput)[offset3-x-1]
+    calcArray.append(closestSeat(tb, replacementVar))
+    calcArray = np.array(calcArray)
+    calcArray = calcArray.flatten()
+    #put original data back in
+    dataInput[y,x] = holddata
+    return sum(calcArray)
 
-def canIRemove(dataPosition,data):
-    datal = data[dataPosition[0]-1]
-    if dataPosition[1]+1 == len(data):
-        datah = data[dataPosition[1]]+3
-    else:
-        datah = data[dataPosition[1]+1]
-    if datah-datal < 4:
-        return True
-    return False
+
+def main(seats):
+    testData = addPadding(seats)
+    ySeat = 1
+    xSeat = 1
+    tmp = []
+    outPutArray = []
+    while ySeat < len(testData) - 1:
+        ySeat += 1
+        while xSeat < len(testData[0]) - 1:
+            xSeat += 1
+            seatBeingChecked = testData[ySeat-1,xSeat-1]
+            if seatBeingChecked == 'L':
+                checkVal = checkSeat(xSeat - 1, ySeat - 1, testData)
+                if checkVal == 0:
+                    seatBeingChecked = '#'
+                else:
+                    seatBeingChecked = 'L'
+            elif seatBeingChecked == '.':
+                seatBeingChecked = '.'
+            elif seatBeingChecked == '#':
+                checkVal = checkSeat(xSeat - 1, ySeat - 1, testData)
+                if checkVal < 4:
+                    seatBeingChecked = '#'
+                else:
+                    seatBeingChecked = 'L'
+            tmp.append(seatBeingChecked)
+        outPutArray.append(tmp)
+        tmp = []
+        xSeat = 1
+    outPutArray = np.array(outPutArray)
+    return outPutArray
+
+def main2(seats):
+    testData = addPadding(seats)
+    ySeat = 1
+    xSeat = 1
+    tmp = []
+    outPutArray = []
+    while ySeat < len(testData) - 1:
+        ySeat += 1
+        while xSeat < len(testData[0]) - 1:
+            xSeat += 1
+            seatBeingChecked = testData[ySeat - 1, xSeat - 1]
+            checkVal = checkSeat2(xSeat - 1, ySeat - 1, testData)
+            if checkVal == 0 and seatBeingChecked == 'L':
+                seatBeingChecked = '#'
+            if checkVal > 4 and seatBeingChecked == '#':
+                seatBeingChecked = 'L'
+            tmp.append(seatBeingChecked)
+        outPutArray.append(tmp)
+        tmp = []
+        xSeat = 1
+    outPutArray = np.array(outPutArray)
+    return outPutArray
 
 
-dataInput = data()
-dataOutput = analyse(dataInput)
-answer1 = dataOutput[1] * dataOutput[3]
-answer2 = analyse2(dataInput)
+def mainLoop(dataInput):
+    answerin = np.array(dataInput)
+    #answerout = np.array(dataInput)
+    answerout = ''
+    countloop = 0
+    while not np.array_equal(answerin,answerout):
+        countloop += 1
+        answerout = np.array(answerin)
+        answerin = main(answerin)
+    return np.count_nonzero(answerin=='#')
+
+def mainLoop2(dataInput):
+    answerin = np.array(dataInput)
+    #answerout = np.array(dataInput)
+    answerout = ''
+    countloop = 0
+    while not np.array_equal(answerin,answerout):
+        countloop += 1
+        answerout = np.array(answerin)
+        answerin = main2(answerin)
+        print("Main Loop",countloop)
+    return np.count_nonzero(answerin=='#')
+
+
+
+answerin = emptySeats(dataInput)
+#testData = addPadding(dataInput)
+
+answer1 = mainLoop(answerin)
+answer2 = mainLoop2(answerin)
+#answer2 = main2(answerin)
+
+
 print("Answer 1")
 print(answer1)
 print("Answer 2")
 print(answer2)
-
-dataInput.remove(0)
-adapters = dataInput
-adapters.sort()
-cache = [0,0,1] + [0] * adapters[-1]
-for a in adapters:
-    # a=1 corresponds to cache[3], so +2
-    i = a + 2
-    cache[i] = sum(cache[i-3:i])
-
-print(cache[-1])
-
-print(AoC.dataInt('test10s.txt'))
 
 print('Took', round(time.time() - start_time,2), 'seconds to complete')
