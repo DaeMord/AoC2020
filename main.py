@@ -2,6 +2,7 @@ import re
 import math
 import time
 import itertools
+import AoC
 
 start_time = time.time()
 
@@ -9,20 +10,6 @@ start_time = time.time()
 #1 Test Long
 #2 Actual live data
 dataInput = 2
-
-def datat():
-
-    dataoutput = []
-    fileName = ''
-    fileName = 'test10f.txt'
-    with open(fileName) as f:
-        for line in f:
-            linedata = line.strip()
-            data = linedata
-            dataoutput.append(int(data))
-    #dataoutput.append(0)
-
-    return dataoutput
 
 def data():
 
@@ -107,27 +94,7 @@ def canIRemove(dataPosition,data):
     return False
 
 
-def countSomething():
-    data = datat()
-    flat = list(itertools.combinations(data,1))
-    numbers = list(itertools.combinations(data, 2))
-    numbers1 = list(itertools.combinations(data, 3))
-    numbers2 = list(itertools.combinations(data, 4))
-    numbers3 = list(itertools.combinations(data, 5))
-    print(flat)
-    print(numbers)
-    print(numbers1)
-    print(numbers2)
-    print(numbers3)
-    print(len(flat))
-    print(len(numbers))
-    print(len(numbers1))
-    print(len(numbers2))
-    print(len(numbers3))
-
-
 dataInput = data()
-#countSomething()
 dataOutput = analyse(dataInput)
 answer1 = dataOutput[1] * dataOutput[3]
 answer2 = analyse2(dataInput)
@@ -135,5 +102,18 @@ print("Answer 1")
 print(answer1)
 print("Answer 2")
 print(answer2)
+
+dataInput.remove(0)
+adapters = dataInput
+adapters.sort()
+cache = [0,0,1] + [0] * adapters[-1]
+for a in adapters:
+    # a=1 corresponds to cache[3], so +2
+    i = a + 2
+    cache[i] = sum(cache[i-3:i])
+
+print(cache[-1])
+
+print(AoC.dataInt('test10s.txt'))
 
 print('Took', round(time.time() - start_time,2), 'seconds to complete')
