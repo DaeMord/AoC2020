@@ -11,7 +11,7 @@ start_time = time.time()
 
 #0 Test Short
 #1 Actual live data
-dataSet = 1
+dataSet = 0
 
 if dataSet == 0:
     dataInput = dataRex('test11.txt','L|.|#')
@@ -174,7 +174,6 @@ def mainLoop2(dataInput):
         countloop += 1
         answerout = np.array(answerin)
         answerin = main2(answerin)
-        print("Main Loop",countloop)
     return np.count_nonzero(answerin=='#')
 
 
@@ -182,14 +181,19 @@ def mainLoop2(dataInput):
 answerin = emptySeats(dataInput)
 #testData = addPadding(dataInput)
 
-answer1 = mainLoop(answerin)
-answer2 = mainLoop2(answerin)
-#answer2 = main2(answerin)
+#answer1 = mainLoop(answerin)
+#answer2 = mainLoop2(answerin)
 
-
+seat_lines = addPadding(answerin).tolist()
+printArray(seat_lines)
+current_row_idx = 1
+current_col_idx = 1
+row_search_data = seat_lines[current_row_idx - 1 : current_row_idx + 2]
+answer1 = sum([col[current_col_idx - 1 : current_col_idx + 2].count("#") for col in row_search_data])
+print (row_search_data)
 print("Answer 1")
 print(answer1)
 print("Answer 2")
-print(answer2)
+#print(answer2)
 
 print('Took', round(time.time() - start_time,2), 'seconds to complete')
