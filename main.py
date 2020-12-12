@@ -1,5 +1,4 @@
 import time
-from AoC import dataRex
 from AoC import rotate
 from AoC import inputData
 
@@ -14,8 +13,6 @@ if dataSet == 0:
 if dataSet == 1:
     dataInput = inputData('input12.txt',t='rex',r='([A-Z])(\d*)')
 
-
-rotate()
 def main():
     currentDir = 'E'
     currentDirVal = 0
