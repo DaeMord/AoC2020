@@ -55,12 +55,10 @@ def main2():
     for i in dataInput:
         if i[0] == 'R':
             rotVal = rotate((0, 0), (wayPoint[1], wayPoint[0]), int(i[1]) * -1)
-            wayPoint[0] = rotVal[1]
-            wayPoint[1] = rotVal[0]
+            wayPoint[0], wayPoint[1] = rotVal[1], rotVal[0]
         elif i[0] == 'L':
             rotVal = rotate((0, 0), (wayPoint[1], wayPoint[0]), int(i[1]))
-            wayPoint[0] = rotVal[1]
-            wayPoint[1] = rotVal[0]
+            wayPoint[0], wayPoint[1] = rotVal[1], rotVal[0]
         elif i[0] == 'F':
             currentCoOrd[0] = currentCoOrd[0] + (wayPoint[0] * int(i[1]))
             currentCoOrd[1] = currentCoOrd[1] + (wayPoint[1] * int(i[1]))
