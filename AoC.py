@@ -1,4 +1,5 @@
 import re
+import math
 
 def test():
     print("Test")
@@ -36,9 +37,23 @@ def dataRex(filename,rex):
     with open(fileName) as f:
         for line in f:
             linedata = line.strip()
-            data = regex.findall(linedata)
+            data = regex.search(linedata).groups()
             dataoutput.append(data)
     return dataoutput
+
+def rotate(origin, point, angle):
+    """
+    Rotate a point counterclockwise by a given angle around a given origin.
+
+    The angle should be given in radians.
+    """
+    ox, oy = origin
+    px, py = point
+    angle = math.radians(angle)
+
+    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+    return round(qx), round(qy)
 
 def printArray(inputArray):
     for x in inputArray:
