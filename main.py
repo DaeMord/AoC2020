@@ -1,6 +1,7 @@
 import time
 from AoC import dataRex
 from AoC import rotate
+from AoC import inputData
 
 start_time = time.time()
 
@@ -9,10 +10,12 @@ start_time = time.time()
 dataSet = 1
 
 if dataSet == 0:
-    dataInput = dataRex('test12.txt','([A-Z])(\d*)')
+    dataInput = inputData('test12.txt',t='rex',r='([A-Z])(\d*)')
 if dataSet == 1:
-    dataInput = dataRex('input12.txt', '([A-Z])(\d*)')
+    dataInput = inputData('input12.txt',t='rex',r='([A-Z])(\d*)')
 
+
+rotate()
 def main():
     currentDir = 'E'
     currentDirVal = 0

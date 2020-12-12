@@ -4,42 +4,28 @@ import math
 def test():
     print("Test")
 
-
-def dataStr(filename):
-
+def inputData(filename,t="str",r=""):
+    """
+    Input data from filename
+    type variables
+    str = string
+    int = numbers
+    rex = regex, r= to set
+    """
     dataoutput = []
     fileName = filename
+    regex = re.compile(r)
     with open(fileName) as f:
         for line in f:
-            linedata = line.strip()
-            data = linedata
-            dataoutput.append(data)
+            if t == 'str':
+                dataoutput.append(line.strip())
+            elif t == 'int':
+                dataoutput.append(int(line.strip()))
+            elif t == 'rex':
+                dataoutput.append(regex.search(line.strip()).groups())
 
     return dataoutput
 
-def dataInt(filename):
-
-    dataoutput = []
-    fileName = filename
-    with open(fileName) as f:
-        for line in f:
-            linedata = line.strip()
-            data = linedata
-            dataoutput.append(int(data))
-
-    return dataoutput
-
-def dataRex(filename,rex):
-
-    regex = re.compile(rex)
-    dataoutput = []
-    fileName = filename
-    with open(fileName) as f:
-        for line in f:
-            linedata = line.strip()
-            data = regex.search(linedata).groups()
-            dataoutput.append(data)
-    return dataoutput
 
 def rotate(origin, point, angle):
     """
