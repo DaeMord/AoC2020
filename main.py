@@ -7,7 +7,7 @@ start_time = time.time()
 
 #0 Test Short
 #1 Actual live data
-dataSet = 0
+dataSet = 1
 
 if dataSet == 0:
     dataInput = inputData('test13.txt')
@@ -45,10 +45,7 @@ def main2():
         elif i == 'x':
             countx += 1
     diffIndex.pop(0)
-    print(dataBusTimesOriginal)
-    print(diffIndex)
-    return 1
-
+    return function(dataBusTimesOriginal, diffIndex)
 
 def checkIfValid(val1, val2, diff):
     origVal1 = val1
@@ -67,15 +64,12 @@ def itterate(num1,num2,diffnum,reachNumber):
         if y > reachNumber:
             return -1
 
-def function():
-    array1 = [7, 13, 59, 31, 19]
-    array2 = [1, 3, 2, 1]
-    x = checkIfValid(7, 19, 7)
+def function(array1, array2):
+    x = checkIfValid(array1[0], array1[-1], sum(array2))
     i = -1
     while True:
         i += 1
         numtocheck = next(x)
-        print(numtocheck)
         result = 0
         y = -1
         while result != -1:
@@ -84,9 +78,6 @@ def function():
             if y == len(array1)-2: break
         if result > 0:
             return numtocheck
-
-print(function())
-
 
 print("Answer 1")
 print(main())
