@@ -1,4 +1,5 @@
 import time
+import re
 from AoC import rotate
 from AoC import inputData
 
@@ -6,72 +7,85 @@ start_time = time.time()
 
 #0 Test Short
 #1 Actual live data
-dataSet = 1
+dataSet = 0
 
 if dataSet == 0:
-    dataInput = inputData('test12.txt',t='rex',r='([A-Z])(\d*)')
+    dataInput = inputData('test13.txt')
 if dataSet == 1:
-    dataInput = inputData('input12.txt',t='rex',r='([A-Z])(\d*)')
+    dataInput = inputData('input13.txt')
 
 def main():
-    currentDir = 'E'
-    currentDirVal = 0
-    dirlist= ['E', 'S', 'W', 'N']
-    countN = 0
-    countS = 0
-    countW = 0
-    countE = 0
-    for i in dataInput:
-        if i[0] == 'R':
-            currentDirVal = currentDirVal + round(int(i[1])/90)
-            if currentDirVal > 3: currentDirVal -= 4
-            currentDir = dirlist[currentDirVal]
-        if i[0] == 'L':
-            currentDirVal = currentDirVal - round(int(i[1]) / 90)
-            if currentDirVal < 0: currentDirVal += 4
-            currentDir = dirlist[currentDirVal]
-        if i[0] == 'F':
-            testVal = currentDir
-        else:
-            testVal = i[0]
-        if testVal == 'N':
-            countN += int(i[1])
-        if testVal == 'S':
-            countS += int(i[1])
-        if testVal == 'W':
-            countW += int(i[1])
-        if testVal == 'E':
-            countE += int(i[1])
-
-    NS = abs(countN-countS)
-    EW = abs(countE-countW)
-    output = NS + EW
-    return output
+    busDepart = int(dataInput[0])
+    busTimes = dataInput[1].split(',')
+    dataBusTimesOriginal = []
+    dataBusTimesOutput = []
+    for i in busTimes:
+        if i != 'x':
+            dataBusTimesOriginal.append(int(i))
+            dataBusTimesOutput.append(int(i))
+    while min(dataBusTimesOutput) < busDepart:
+            minIndex = dataBusTimesOutput.index(min(dataBusTimesOutput))
+            dataBusTimesOutput[minIndex] = dataBusTimesOutput[minIndex] + dataBusTimesOriginal[minIndex]
+    minIndex = dataBusTimesOutput.index(min(dataBusTimesOutput))
+    return dataBusTimesOriginal[minIndex]*(dataBusTimesOutput[minIndex]-busDepart)
 
 def main2():
-    wayPoint = [1, 10]
-    currentCoOrd = [0, 0]
+    busDepart = int(dataInput[0])
+    busTimes = dataInput[1].split(',')
+    dataBusTimesOriginal = []
+    dataBusTimesOutput = []
+    diffIndex = []
+    countx = 1
+    for i in busTimes:
+        if i != 'x':
+            dataBusTimesOriginal.append(int(i))
+            dataBusTimesOutput.append(int(i))
+            diffIndex.append(int(countx))
+            countx = 1
+        elif i == 'x':
+            countx += 1
+    diffIndex.pop(0)
+    print(dataBusTimesOriginal)
+    print(diffIndex)
+    return 1
 
-    for i in dataInput:
-        if i[0] == 'R':
-            rotVal = rotate((0, 0), (wayPoint[1], wayPoint[0]), int(i[1]) * -1)
-            wayPoint[0], wayPoint[1] = rotVal[1], rotVal[0]
-        elif i[0] == 'L':
-            rotVal = rotate((0, 0), (wayPoint[1], wayPoint[0]), int(i[1]))
-            wayPoint[0], wayPoint[1] = rotVal[1], rotVal[0]
-        elif i[0] == 'F':
-            currentCoOrd[0] = currentCoOrd[0] + (wayPoint[0] * int(i[1]))
-            currentCoOrd[1] = currentCoOrd[1] + (wayPoint[1] * int(i[1]))
-        elif i[0] == 'N':
-            wayPoint[0] = wayPoint[0] + int(i[1])
-        elif i[0] == 'S':
-            wayPoint[0] = wayPoint[0] - int(i[1])
-        elif i[0] == 'W':
-            wayPoint[1] = wayPoint[1] - int(i[1])
-        elif i[0] == 'E':
-            wayPoint[1] = wayPoint[1] + int(i[1])
-    output = abs(currentCoOrd[0]) + abs(currentCoOrd[1])
-    return output
+
+def checkIfValid(val1, val2, diff):
+    origVal1 = val1
+    while True:
+        while (val1+diff) % val2 != 0:
+            val1 += origVal1
+        yield val1
+        val1 += origVal1
+
+def itterate(num1,num2,diffnum,reachNumber):
+    x = checkIfValid(num1, num2, diffnum)
+    while True:
+        y = next(x)
+        if y == reachNumber:
+            return y
+        if y > reachNumber:
+            return -1
+
+def function():
+    array1 = [7, 13, 59, 31, 19]
+    array2 = [1, 3, 2, 1]
+    x = checkIfValid(7, 19, 7)
+    i = -1
+    while True:
+        i += 1
+        numtocheck = next(x)
+        print(numtocheck)
+        result = 0
+        y = -1
+        while result != -1:
+            y += 1
+            result = itterate(array1[y],array1[y+1],array2[y],numtocheck+sum(array2[:y]))
+            if y == len(array1)-2: break
+        if result > 0:
+            return numtocheck
+
+print(function())
 
 
 print("Answer 1")
