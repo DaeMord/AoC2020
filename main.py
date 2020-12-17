@@ -10,118 +10,173 @@ dataSet = 1
 
 
 if dataSet == 0:
-    dataInput = inputData('test16.txt')
+    dataInput = inputData('test17.txt')
 if dataSet == 1:
-    dataInput = inputData('input16.txt')
-if dataSet == 2:
-    dataInput = inputData('test162.txt')
+    dataInput = inputData('input17.txt')
 
-def checkData():
-    entryrex = re.compile('^(.*): (\d*)-(\d*) or (\d*)-(\d*)')
-    checkDataDict = {}
-    dataType = 0
-    yourTicket = []
-    closeTickets = []
-    for y, i in enumerate(dataInput):
-        if i == '':
-                pass
-        elif i == 'your ticket:':
-            dataType = 1
-        elif i == 'nearby tickets:':
-            dataType = 2
-        else:
-            if dataType == 0:
-                dataLine = entryrex.search(i).groups()
-                checkDataDict[dataLine[0]] = ((int(dataLine[1]) , int(dataLine[2])),(int(dataLine[3]),int(dataLine[4])))
-            elif dataType == 1:
-                yourTicket = i.split(',')
-            elif dataType == 2:
-                tmpTicket = i.split(',')
-                closeTickets.append(tmpTicket)
-    return checkDataDict, yourTicket, closeTickets
+def createTransform():
+    outputData = []
+    for x in range(-1,2):
+        for y in range(-1,2):
+            for z in range(-1,2):
+                if not (x == 0 and y == 0 and z == 0):
+                    outputData.append((x, y, z))
+    return outputData
 
-def createRangeData(checkDict):
-    rangeData = []
-    locationDict = {}
-    y = 0
-    for i in checkDict:
-        rangeData.append(checkDict[i][0])
-        rangeData.append(checkDict[i][1])
-        locationDict[y] = i
-        locationDict[y+1] = i
-        y += 2
-    return rangeData,locationDict
+def createTransform4():
+    outputData = []
+    for x in range(-1,2):
+        for y in range(-1,2):
+            for z in range(-1,2):
+                for w in range(-1,2):
+                    if not (x == 0 and y == 0 and z == 0 and w == 0):
+                        outputData.append((x, y, z, w))
+    return outputData
 
-def main(data):
-    rangeDataReturn = createRangeData(data[0])
-    rangeData = rangeDataReturn[0]
-    outofRange = []
-    validTicket = []
-    ticketData = data[2]
-    for i in ticketData:
-        ticketInvalid = 0
-        for y in i:
-            inRange = 0
-            for z in rangeData:
-                if z[0] <= int(y) <= z[1]:
-                    inRange = 1
-            if inRange == 0:
-                outofRange.append(int(y))
-                ticketInvalid = 1
-        if ticketInvalid == 0: validTicket.append(i)
-    return sum(outofRange),validTicket
+def valsToCheck(valx,valy,valz,transform):
+    outputData = []
+    for i in transform:
+        outputData.append(((i[0]+valx),(i[1]+valy),(i[2]+valz)))
+    return outputData
 
-def findRowAnswer(validTickets,data,column):
-    rangeData = data[0]
-    dictCheck = data[1]
-    val1 = set()
-    for i in validTickets:
-        val0 = set()
-        for d, z in enumerate(rangeData):
-            if z[0] <= int(i[column]) <= z[1]:
-                val0.add(dictCheck[d])
-        #print(val0,val1)
-        commonValue = val0.intersection(val1)
-        #print(commonValue)
-        val1 = set()
-        if len(commonValue) > 0:
-            val1 = commonValue
-        else:
-            val1 = val0
-    return commonValue
+def valsToCheck4(valx,valy,valz,valw,transform):
+    outputData = []
+    for i in transform:
+        outputData.append(((i[0]+valx),(i[1]+valy),(i[2]+valz),i[3]+valw))
+    return outputData
 
-data = checkData()
-rangeData = createRangeData(data[0])
-output = main(data)
-findRow = findRowAnswer(output[1],rangeData,0)
-ticketInfo = []
-for i in range(len(output[1][0])):
-    findRow = findRowAnswer(output[1], rangeData, i)
-    ticketInfo.append(list(findRow))
-dictTicketInfo = {}
-setFound = set()
-loop = 0
-while True:
-    loop += 1
-    arraycount = 0
-    for y, i in enumerate(ticketInfo):
-        if len(i) == 1:
-            dictTicketInfo[y] = i[0]
-            setFound.add(i[0])
-    for y, i in enumerate(ticketInfo):
-        if len(i) > 1:
-            ticketInfo[y] = (list(set(ticketInfo[y]) - setFound))
-        else:
-            arraycount += 1
-    if arraycount == 20: break
-finalOutput = 1
-for y, i in enumerate(ticketInfo):
-    if re.search('^departure', i[0]):
-        finalOutput *= int(data[1][y])
+def createInitialData():
+    outputData = []
+    for y, line in enumerate(dataInput):
+        for x, data in enumerate(line):
+            if data == '#':
+                outputData.append((x,y,0))
+    return(outputData)
+
+def createInitialData4():
+    outputData = []
+    for y, line in enumerate(dataInput):
+        for x, data in enumerate(line):
+            if data == '#':
+                outputData.append((x,y,0,0))
+    return(outputData)
+
+def xpos(val):
+    return val[0]
+
+def ypos(val):
+    return val[1]
+
+def zpos(val):
+    return val[2]
+
+def wpos(val):
+    return val[3]
+
+def countNeighbor(xval,yval,zval,data,transformData):
+    datatocheck = valsToCheck(xval,yval,zval,transformData)
+    outputCount = 0
+    for i in datatocheck:
+        if i in data:
+            outputCount += 1
+    return outputCount
+
+def countNeighbor4(xval,yval,zval,wval,data,transformData):
+    datatocheck = valsToCheck4(xval,yval,zval,wval,transformData)
+    outputCount = 0
+    for i in datatocheck:
+        if i in data:
+            outputCount += 1
+    return outputCount
+
+def printAxis(data):
+    xmax = max(list(map(xpos,(data))))
+    xmin = min(list(map(xpos, (data))))
+    ymax = max(list(map(ypos, (data))))
+    ymin = min(list(map(ypos, (data))))
+    zmax = max(list(map(zpos, (data))))
+    zmin = min(list(map(zpos, (data))))
+    for zcoord in range(zmin, zmax + 1):
+        for ycoord in range(ymin, ymax + 1):
+            for xcoord in range(xmin, xmax + 1):
+                currentCoord = ((xcoord, ycoord, zcoord))
+                if currentCoord in data:
+                    print('#', end = '')
+                else:
+                    print('.',end='')
+            print('')
+        print('')
+
+def main():
+    initialData = createInitialData()
+    transformData = createTransform()
+    datatoCheck = initialData
+    for i in range(6):
+        tmparray = []
+        xmax = max(list(map(xpos, (datatoCheck))))
+        xmin = min(list(map(xpos, (datatoCheck))))
+        ymax = max(list(map(ypos, (datatoCheck))))
+        ymin = min(list(map(ypos, (datatoCheck))))
+        zmax = max(list(map(zpos, (datatoCheck))))
+        zmin = min(list(map(zpos, (datatoCheck))))
+        for xcoord in range(xmin-1,xmax+2):
+            for ycoord in range(ymin - 1, ymax + 2):
+                for zcoord in range(zmin - 1, zmax + 2):
+                    currentCoord = ((xcoord,ycoord,zcoord))
+                    neighborCount = countNeighbor(xcoord,ycoord,zcoord,datatoCheck,transformData)
+                    if neighborCount == 3:
+                        tmparray.append(currentCoord)
+                    if neighborCount == 2 and currentCoord in datatoCheck:
+                        tmparray.append(currentCoord)
+        datatoCheck = tmparray
+    return len(datatoCheck)
+
+def main4():
+    initialData = createInitialData4()
+    transformData = createTransform4()
+    datatoCheck = initialData
+    for i in range(6):
+        loop_time = time.time()
+        tmparray = []
+        xmax = max(list(map(xpos, (datatoCheck))))
+        xmin = min(list(map(xpos, (datatoCheck))))
+        ymax = max(list(map(ypos, (datatoCheck))))
+        ymin = min(list(map(ypos, (datatoCheck))))
+        zmax = max(list(map(zpos, (datatoCheck))))
+        zmin = min(list(map(zpos, (datatoCheck))))
+        wmax = max(list(map(wpos, (datatoCheck))))
+        wmin = min(list(map(wpos, (datatoCheck))))
+        for xcoord in range(xmin-1,xmax+2):
+            for ycoord in range(ymin - 1, ymax + 2):
+                for zcoord in range(zmin - 1, zmax + 2):
+                    for wcoord in range(wmin - 1, wmax + 2):
+                        currentCoord = ((xcoord,ycoord,zcoord,wcoord))
+                        neighborCount = countNeighbor4(xcoord,ycoord,zcoord,wcoord,datatoCheck,transformData)
+                        if neighborCount == 3:
+                            tmparray.append(currentCoord)
+                        if neighborCount == 2 and currentCoord in datatoCheck:
+                            tmparray.append(currentCoord)
+        datatoCheck = tmparray
+        print("Loop",i,"Done in", round(time.time() - loop_time,2),"seconds")
+    return len(datatoCheck)
 
 print("Answer 1")
-print(output[0])
+print(main())
 print("Answer 2")
-print(finalOutput)
+print(main4())
+
+"""
+Answer 1
+395
+Answer 2
+Loop 0 Done in 0.05 seconds
+Loop 1 Done in 0.6 seconds
+Loop 2 Done in 2.77 seconds
+Loop 3 Done in 20.78 seconds
+Loop 4 Done in 28.06 seconds
+Loop 5 Done in 179.54 seconds
+2296
+Took 232.78 seconds to complete
+"""
 
 print('Took', round(time.time() - start_time,2), 'seconds to complete')
