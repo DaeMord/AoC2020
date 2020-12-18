@@ -11,6 +11,7 @@ def inputData(filename,t="str",r=""):
     str = string
     int = numbers
     rex = regex, r= to set
+    rfa = refex Find all r= to set
     """
     dataoutput = []
     fileName = filename
@@ -23,6 +24,8 @@ def inputData(filename,t="str",r=""):
                 dataoutput.append(int(line.strip()))
             elif t == 'rex':
                 dataoutput.append(regex.search(line.strip()).groups())
+            elif t == 'rfa':
+                dataoutput.append(regex.findall(line.strip()))
 
     return dataoutput
 
