@@ -24,46 +24,46 @@ def stripData():
         if data == "":
             dataType = 1
         elif dataType == 0:
-            lineData = data.replace(':','').replace('"','').split()
-            dataDict[int(lineData[0])] = lineData[1:]
+            lineData,splitData = data.split(': ')
+            if splitData.startswith('"'):
+                dataDict[int(lineData)] = eval(splitData)
+            else:
+                dataDict[int(lineData)] = [[*map(int, part.split())] for part in splitData.split(' | ')]
         elif dataType == 1:
             analysisList.append(data)
     return dataDict,analysisList
 
-def findVals(data,val):
-    dataOutput = []
-    for i in val:
-        for y in data[i]:
-            if (y) != '|':
-                if len(data[int(y)]) == 1:
-                    if len(dataOutput) == 0:
-                        dataOutput.append(data[int(y)][0])
-                    else:
-                        tmp = []
-                        for z, x in enumerate(dataOutput):
-                            tmp.append(x+data[int(y)][0])
-                        dataOutput = tmp
-                else:
-                    dataOutput.append(findVals(data,[int(y)]))
-
-            else:
-                tmp = []
-                print("Doing This")
-                print(dataOutput)
-                for x in dataOutput:
-                    tmp.append(x + '|')
-                dataOutput = tmp
-    if len(dataOutput) == 1:
-        #print(dataOutput[0].split('|'))
-        pass
-    else:
-        #print(dataOutput)
-        pass
-    #print(tmpnew)
-    #return dataOutput[0].split('|')
 
 data = stripData()[0]
-print(findVals(data,[1]))
+
+def buildReg(idx):
+    val0 = (data[idx])
+    if isinstance(val0,str):
+        return val0
+    if len(val0) == 2:
+        outputArray = []
+        for i in val0:
+            array1 = ""
+            array2 = []
+            for z in i:
+                if isinstance(buildReg(z),str):
+                    array1 = array1 + buildReg(z)
+                else:
+                    array2.append(buildReg(z))
+            if len(array2) == 0:
+                outputArray.append(array1)
+            else:
+                outputArray = array2
+        return(outputArray)
+
+for i in (data[0][0]):
+    x = buildReg(i)
+    if isinstance(x,str):
+        print(x)
+    else:
+        for i in x:
+            print(i)
+
 
 print("Answer 1")
 #print(main(dataInput1,1))
